@@ -1,0 +1,39 @@
+# Use Ubuntu as the base image
+FROM ubuntu:22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    curl wget unzip python3 python3-pip build-essential git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Ollama (non-interactive installation)
+RUN curl https://ollama.com/install.sh | sh
+
+# Pre-pull the mistral model (adjust if you need a different model)
+RUN ollama pull mistral
+
+# Install cloudflared (for Cloudflare Tunnel)
+RUN wget https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb && \
+    dpkg -i cloudflared-linux-amd64.deb && \
+    rm cloudflared-linux-amd64.deb
+
+# Copy Python requirements file and install dependencies
+COPY requirements.txt /tmp/requirements.txt
+RUN pip3 install -r /tmp/requirements.txt
+
+# Copy the entire app code into /app directory
+WORKDIR /app
+COPY . /app
+
+# Copy the environment validator script (if used)
+COPY env_validator.py /app/
+
+# Expose necessary ports
+# 8501 for Streamlit, 11434 for Ollama, 4000 for Cloudflare Tunnel
+EXPOSE 8501 11434 4000
+
+# Run the environment validator before starting the app.
+# The entrypoint can be switched later if using Kubernetes or secrets managers.
+CMD ["bash", "-c", "python3 env_validator.py && streamlit run app.py --server.port=8501 --server.enableCORS=false"]

@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "8501:8501"     # Streamlit app
+      - "11434:11434"   # Ollama (for local summarization)
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    restart: unless-stopped
+    depends_on:
+      - cloudflared
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    command: tunnel --no-autoupdate --url http://localhost:11434 --hello
+    # Alternatively, if you need auth, you could configure:
+    # command: tunnel --no-autoupdate --hostname your.domain.com --url http://localhost:11434 --basic-auth $CF_USER:$CF_PASSWORD
+    ports:
+      - "4000:4000"
+    env_file:
+      - .env
+    restart: unless-stopped

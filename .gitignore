@@ -1,0 +1,37 @@
+# ignore environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.*.local
+
+# ignore node modules
+node_modules
+node_modules/
+
+# ignore build output
+dist
+dist/
+build
+build/
+build/
+
+# ignore logs
+logs
+logs/
+*.log
+npm-debug.log* 
+
+# ignore kubernetes yaml
+secrets.yaml
+deployment.yaml
+service.yaml
+
+# ignore virtual environment files
+.venv
+venv/
+__pycache__
+__pycache__/
+*.pyc
+*.pyo

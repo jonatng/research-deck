@@ -1,0 +1,9 @@
+streamlit
+trafilatura
+python-pptx
+requests
+supabase
+docker-compose
+kubectl
+minikube
+docker
