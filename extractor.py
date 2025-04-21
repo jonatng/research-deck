@@ -1,7 +1,7 @@
-from trafilatura import fetch_url, extract
+import trafilatura
 
-def extract_text_from_url(url: str) -> str:
-    downloaded = fetch_url(url)
+def extract_text_from_url(url):
+    downloaded = trafilatura.fetch_url(url)
     if downloaded:
-        return extract(downloaded)
-    return ""
+        return trafilatura.extract(downloaded)
+    return None

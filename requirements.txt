@@ -1,9 +1,8 @@
 streamlit
+python-dotenv
 trafilatura
-python-pptx
-requests
+transformers
+torch
 supabase
-docker-compose
-kubectl
-minikube
-docker
+python-pptx
+sentencepiece
