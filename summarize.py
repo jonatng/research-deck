@@ -1,28 +1,42 @@
-from transformers import pipeline
 import os
-import requests
+from llm_clients import openai_client, ollama_client, OLLAMA_MODEL
 
-def get_local_summarizer():
-    return pipeline("summarization", model="facebook/bart-large-cnn")
+def summarize_text(text, method=None):
+    prompt = f"Summarize the main points of this article:\n\n{text[:5000]}"
 
-def summarize_text(text, summarizer, max_len=512):
-    return summarizer(text, max_length=max_len, min_length=30, do_sample=False)[0]["summary_text"]
+    # Auto-detect method if not provided
+    if method is None:
+        if openai_client:
+            method = "openai"
+        elif ollama_client:
+            method = "ollama"
+        else:
+            raise RuntimeError("❌ No LLM client is available. Please check your environment settings.")
 
-def summarize_via_hf_api(text, model="facebook/bart-large-cnn"):
-    token = os.getenv("HUGGINGFACE_TOKEN")
-    if not token:
-        return "[Error] Hugging Face token not found"
+    # OpenAI path
+    if method == "openai" and openai_client:
+        try:
+            response = openai_client.chat.completions.create(
+                model="gpt-4.1-mini",  # Or "gpt-4" if unsupported
+                messages=[{"role": "user", "content": prompt}]
+            )
+            return response.choices[0].message.content
+        except Exception as e:
+            print(f"❌ OpenAI error: {e}")
+            return "Error using OpenAI"
 
-    headers = {"Authorization": f"Bearer {token}"}
-    payload = {"inputs": text}
+    # Ollama path
+    elif method == "ollama" and ollama_client:
+        try:
+            response = ollama_client.chat(
+                model=OLLAMA_MODEL,
+                messages=[{"role": "user", "content": prompt}]
+            )
+            return response["message"]["content"]
+        except Exception as e:
+            print(f"❌ Ollama error: {e}")
+            return "Error using Ollama"
 
-    response = requests.post(
-        f"https://api-inference.huggingface.co/models/{model}",
-        headers=headers,
-        json=payload
-    )
-
-    if response.status_code == 200:
-        return response.json()[0]["summary_text"]
+    # Fallback if method is invalid
     else:
-        return f"[API Error] {response.status_code}: {response.text}"
+        raise ValueError(f"❌ Unknown or unsupported summarization method: {method}")

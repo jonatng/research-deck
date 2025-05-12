@@ -1,8 +1,12 @@
-streamlit
-python-dotenv
-trafilatura
+undetected-chromedriver
+beautifulsoup4
+requests
 transformers
 torch
-supabase
+streamlit
 python-pptx
-sentencepiece
+python-dotenv
+ollama
+supabase
+openai
+playwright

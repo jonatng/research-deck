@@ -1,12 +1,33 @@
+version: '3.8'
+
 services:
-  app:
-    build: .
-    container_name: research-deck
+  ollama:
+    image: ollama/ollama
     ports:
-      - "8501:8501"
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    restart: unless-stopped
+
+  research-deck:
+    build: .
     env_file:
       - .env
+    depends_on:
+      - ollama
+    environment:
+      - USE_OPENAI=${USE_OPENAI}        
+      # - OPENAI_API_KEY=${OPENAI_API_KEY}
+      # - OLLAMA_MODEL=deepseek-r1
+      # - OLLAMA_BASE_URL=http://ollama:11434
+      # - SUPABASE_URL=${SUPABASE_URL}
+      # - SUPABASE_KEY=${SUPABASE_KEY}
+      # - HUGGINGFACE_TOKEN=${HUGGINGFACE_TOKEN}
     volumes:
       - .:/app
-    restart: unless-stopped
-    command: streamlit run app.py --server.port=8501 --server.enableCORS=false
+    ports:
+      - "8501:8501"
+    command: streamlit run app.py
+
+volumes:
+  ollama-data:
