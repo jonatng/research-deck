@@ -1,8 +1,8 @@
 from dotenv import load_dotenv
 load_dotenv()
 
+# Import but don't initialize immediately to avoid blocking
 from llm_clients import initialize_clients, openai_client, ollama_client, OLLAMA_MODEL, OLLAMA_BASE_URL
-initialize_clients()
 
 import os
 import json
@@ -113,6 +113,16 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
+# === Initialize LLM Clients ===
+# Initialize clients when needed, not at import time
+if 'clients_initialized' not in st.session_state:
+    try:
+        initialize_clients()
+        st.session_state.clients_initialized = True
+    except Exception as e:
+        st.session_state.clients_initialized = False
+        st.session_state.client_error = str(e)
+
 # === Sidebar Configuration ===
 with st.sidebar:
     st.header("⚙️ Configuration")
@@ -129,15 +139,32 @@ with st.sidebar:
     # Status indicators
     st.subheader("📊 System Status")
     
+    # Check if running on Hugging Face Spaces
+    IS_HUGGINGFACE_SPACE = os.getenv("SPACE_ID") is not None
+    
+    if IS_HUGGINGFACE_SPACE:
+        st.info("🚀 Running on Hugging Face Spaces")
+    
+    # Show client initialization status
+    if not st.session_state.get('clients_initialized', False):
+        if 'client_error' in st.session_state:
+            st.warning(f"⚠️ Client initialization issue: {st.session_state.client_error}")
+    
     if openai_client:
         st.success("✅ OpenAI: Available")
     else:
-        st.warning("⚠️ OpenAI: Not configured")
+        if IS_HUGGINGFACE_SPACE:
+            st.warning("⚠️ OpenAI: Configure API key in Space settings")
+        else:
+            st.warning("⚠️ OpenAI: Not configured")
     
     if ollama_client:
         st.success("✅ Ollama: Available")
     else:
-        st.warning("⚠️ Ollama: Not available")
+        if IS_HUGGINGFACE_SPACE:
+            st.info("ℹ️ Ollama: Not available on HF Spaces")
+        else:
+            st.warning("⚠️ Ollama: Not available")
     
     # Advanced Options
     with st.expander("🔧 Advanced Options"):
@@ -202,6 +229,9 @@ with col2:
         st.info(f"📄 File: {uploaded_pptx.name}")
 
 # === Method Selection Logic ===
+# Check if running on Hugging Face Spaces
+IS_HUGGINGFACE_SPACE = os.getenv("SPACE_ID") is not None
+
 if "Ollama" in model_choice and ollama_client:
     selected_method = "ollama"
     st.info("🤖 Using Ollama Local Model - Free and private!")
@@ -211,9 +241,16 @@ elif "OpenAI" in model_choice and openai_client:
 else:
     selected_method = None
     if "OpenAI" in model_choice:
-        st.error("❌ OpenAI API key not configured. Please set OPENAI_API_KEY environment variable.")
+        if IS_HUGGINGFACE_SPACE:
+            st.warning("⚠️ To use this app on Hugging Face Spaces, please set your OPENAI_API_KEY in the Space settings.")
+            st.info("💡 Go to your Space settings → Repository secrets → Add OPENAI_API_KEY")
+        else:
+            st.error("❌ OpenAI API key not configured. Please set OPENAI_API_KEY environment variable.")
     else:
-        st.error("❌ Ollama not available. Please ensure Docker containers are running.")
+        if IS_HUGGINGFACE_SPACE:
+            st.warning("⚠️ Ollama is not available on Hugging Face Spaces. Please select OpenAI and configure your API key.")
+        else:
+            st.error("❌ Ollama not available. Please ensure Docker containers are running.")
 
 # === Processing Functions ===
 def process_urls(urls, method):

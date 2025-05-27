@@ -1,7 +1,6 @@
 [server]
 headless = true
-port = 7860
-enableCORS = false
+enableCORS = true
 enableXsrfProtection = false
 
 [browser]
