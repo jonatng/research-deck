@@ -1,119 +1,145 @@
 ---
-title: Research Deck
-emoji: 🦀
-colorFrom: gray
-colorTo: red
+title: AI Research Deck
+emoji: 📰
+colorFrom: blue
+colorTo: purple
 sdk: streamlit
-sdk_version: 1.44.1
+sdk_version: 1.29.0
 app_file: app.py
 pinned: false
 license: mit
 ---
 
-Check out the configuration reference at https://huggingface.co/docs/hub/spaces-config-reference
+# 📰 AI Research Deck
 
-🧠 AI Researcher: Website Summarizer & PowerPoint Generator
-A Streamlit-based app that summarizes articles from URLs using either a local transformer model or the Hugging Face API, then exports the results into a PowerPoint presentation. Summaries are also saved to Supabase.
+An intelligent article summarization tool that extracts content from web URLs and generates concise summaries using AI models. Export your research directly to PowerPoint presentations.
 
-🚀 Features
-📰 Summarize multiple URLs at once
+## 🚀 Quick Start (Local Installation)
 
-🤖 Choose between:
+### Prerequisites
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running
 
-Local model (facebook/bart-large-cnn)
+### One-Click Setup
 
-Hugging Face API
-
-📊 Export summaries to PowerPoint (new or append to existing)
-
-☁️ Save summaries to Supabase
-
-🐳 Fully containerized via Docker
-
-🧱 Tech Stack
-Python (Streamlit, Transformers, Requests, python-pptx)
-
-Supabase (PostgreSQL storage)
-
-Docker & Docker Compose
-
-📦 Setup
-1. Clone the repo
-bash
-Copy
-Edit
+**For Mac/Linux users:**
+```bash
 git clone https://github.com/yourusername/research-deck.git
 cd research-deck
-2. Configure environment
-Create a .env file in the root directory:
+./start.sh
+```
 
-env
-Copy
-Edit
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_KEY=your_supabase_service_role_key
-HUGGINGFACE_TOKEN=your_huggingface_api_key
-ENV=local
-🔐 Never commit your .env file!
+**For Windows users:**
+```cmd
+git clone https://github.com/yourusername/research-deck.git
+cd research-deck
+start.bat
+```
 
-3. Install dependencies (local dev)
-bash
-Copy
-Edit
-pip install -r requirements.txt
-4. Run the app locally
-bash
-Copy
-Edit
-streamlit run app.py
-🐳 Docker Setup
-1. Build and run with Docker Compose
-bash
-Copy
-Edit
-docker-compose up --build
-2. Access the app
-Visit: http://localhost:8501
+That's it! The script will:
+- ✅ Check if Docker is running
+- 📦 Download and start all required services
+- 🤖 Set up the AI model (llama2)
+- 🌐 Open the app at http://localhost:7860
 
-🛠 Kubernetes Deployment
-Optional for production
+### Manual Setup (Alternative)
+```bash
+git clone https://github.com/yourusername/research-deck.git
+cd research-deck
+docker compose up -d
+```
 
-Prereqs
-Supabase URL/key and Hugging Face token stored in Kubernetes ConfigMap and Secret
+## Features
 
-Deploy
-bash
-Copy
-Edit
-kubectl apply -f configmap.yaml
-kubectl apply -f secrets.yaml
-kubectl apply -f deployment.yaml
-kubectl apply -f service.yaml
-kubectl apply -f hpa.yaml  # Optional: Autoscaling
-📂 File Structure
-bash
-Copy
-Edit
-.
-├── app.py                 # Streamlit app
-├── db.py                 # Supabase DB logic
-├── extractor.py          # Web article scraper
-├── ppt_handler.py        # PowerPoint creation
-├── summarize.py          # Summarization logic
-├── config.py             # .env validation
-├── Dockerfile
-├── docker-compose.yml
-├── requirements.txt
-└── k8s/                  # (Optional) Kubernetes YAMLs
-✅ Todo / Improvements
- Add title + date extraction from URL
+- 🔍 **Smart Content Extraction**: Automatically extracts article content, metadata, and Open Graph data
+- 🤖 **Local AI Processing**: Uses Ollama with Llama2 model (no API keys required!)
+- 📊 **PowerPoint Export**: Create new presentations or append to existing ones
+- 💾 **Optional Database Storage**: Persistent storage of summaries using Supabase
+- 🎨 **Modern UI**: Clean, intuitive Streamlit interface
 
- UI enhancements (loading states, URL validation)
+## How to Use
 
- SQLite fallback if Supabase is down
+1. Enter one or more article URLs (one per line)
+2. Choose your preferred AI model:
+   - **Ollama Local Model**: Free, runs locally, no API required
+   - **OpenAI GPT**: Requires API key, higher quality summaries
+3. Click "Run Summarization"
+4. Download your PowerPoint presentation
 
- Allow markdown or PDF exports
+## Optional Enhancements
 
-📘 License
-MIT License.
-Built with 💡 and ☕ by @jonatngu
+For enhanced features, you can set these environment variables:
+
+```bash
+# For OpenAI GPT (higher quality summaries)
+export OPENAI_API_KEY=your_openai_key
+export USE_OPENAI=true
+
+# For database storage
+export SUPABASE_URL=your_supabase_url
+export SUPABASE_KEY=your_supabase_key
+```
+
+## Stopping the Application
+
+**Easy way:**
+```bash
+./stop.sh    # Mac/Linux
+stop.bat     # Windows
+```
+
+**Manual way:**
+```bash
+docker compose down
+```
+
+## Project Structure
+
+```
+research-deck/
+├── 🚀 start.sh / start.bat     # One-click startup scripts
+├── 🛑 stop.sh / stop.bat       # Easy shutdown scripts
+├── 🐳 docker-compose.yaml      # Docker services configuration
+├── 📱 app.py                   # Main Streamlit application
+├── 🔧 Dockerfile               # Container build instructions
+├── 📋 requirements.txt         # Python dependencies
+├── ⚙️  config.py               # Environment configuration
+├── 🌐 article_info_extractor.py # Web scraping logic
+├── 🤖 summarize.py             # AI summarization logic
+├── 💾 db.py                    # Database operations
+├── 📊 ppt_handler.py           # PowerPoint generation
+└── 🎨 .streamlit/              # UI configuration
+```
+
+## Troubleshooting
+
+**"Docker is not running"**: Start Docker Desktop and wait for it to fully load
+
+**"Site cannot be reached"**: Wait a few minutes for the AI model to download on first run
+
+**Slow performance**: The local AI model takes time to process. For faster results, consider using OpenAI API
+
+## Technologies Used
+
+- **Streamlit**: Web interface
+- **Ollama + Llama2**: Local AI model (no API required)
+- **OpenAI GPT**: Optional enhanced AI (requires API key)
+- **Playwright**: Web scraping
+- **python-pptx**: PowerPoint generation
+- **Docker**: Containerized deployment
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## Support
+
+💳 Support this project: [Venmo @jonatng](https://venmo.com/u/jonatng)
+🔗 Connect: [LinkedIn](https://www.linkedin.com/in/jonatng/)
+
+## License
+
+MIT License - see LICENSE file for details.
+
+---
+
+*Built with ❤️ for researchers and content creators*

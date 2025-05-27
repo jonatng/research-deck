@@ -21,19 +21,87 @@ build/
 logs
 logs/
 *.log
-npm-debug.log* 
-
-# ignore kubernetes yaml
-secrets.yaml
-deployment.yaml
-service.yaml
-hpa.yaml
-configmap.yaml
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
 # ignore virtual environment files
 .venv
 venv/
+myenv/
+env/
+ENV/
 __pycache__
 __pycache__/
 *.pyc
 *.pyo
+*.pyd
+.Python
+
+# ignore generated files and outputs
+*.pptx
+*.pdf
+*.docx
+*.xlsx
+
+# ignore cache directories and files
+cache/
+downloads/
+# but keep directory structure
+!cache/.gitkeep
+!downloads/.gitkeep
+
+.cache/
+.pytest_cache/
+.coverage
+.nyc_output
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ignore temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+.#*
+\#*#
+
+# ignore IDE and editor files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.atom/
+
+# ignore Docker volumes and data
+docker-data/
+postgres-data/
+ollama-data/
+
+# ignore Playwright cache
+.playwright/
+playwright-report/
+test-results/
+
+# ignore AI model files (large files)
+*.bin
+*.safetensors
+*.gguf
+*.ggml
+models/
+model_cache/
+
+# ignore Jupyter notebook checkpoints
+.ipynb_checkpoints/
+
+# ignore OS generated files
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*

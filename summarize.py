@@ -11,19 +11,20 @@ def summarize_text(text, method=None):
         elif ollama_client:
             method = "ollama"
         else:
-            raise RuntimeError("❌ No LLM client is available. Please check your environment settings.")
+            # Provide a basic fallback summary
+            return create_fallback_summary(text)
 
     # OpenAI path
     if method == "openai" and openai_client:
         try:
             response = openai_client.chat.completions.create(
-                model="gpt-4.1-mini",  # Or "gpt-4" if unsupported
+                model="gpt-4o-mini",  # Updated to correct model name
                 messages=[{"role": "user", "content": prompt}]
             )
             return response.choices[0].message.content
         except Exception as e:
             print(f"❌ OpenAI error: {e}")
-            return "Error using OpenAI"
+            return create_fallback_summary(text)
 
     # Ollama path
     elif method == "ollama" and ollama_client:
@@ -35,8 +36,19 @@ def summarize_text(text, method=None):
             return response["message"]["content"]
         except Exception as e:
             print(f"❌ Ollama error: {e}")
-            return "Error using Ollama"
+            return create_fallback_summary(text)
 
     # Fallback if method is invalid
     else:
-        raise ValueError(f"❌ Unknown or unsupported summarization method: {method}")
+        return create_fallback_summary(text)
+
+def create_fallback_summary(text):
+    """Create a basic summary when AI models are not available"""
+    # Take first few sentences as a basic summary
+    sentences = text.split('. ')
+    summary_sentences = sentences[:3]  # Take first 3 sentences
+    summary = '. '.join(summary_sentences)
+    if not summary.endswith('.'):
+        summary += '.'
+    
+    return f"📄 Basic Summary (AI models unavailable):\n\n{summary}\n\n⚠️ This is a basic text excerpt. For AI-powered summaries, please configure OpenAI API key."

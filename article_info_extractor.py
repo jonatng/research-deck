@@ -16,13 +16,19 @@ CACHE_DIR.mkdir(exist_ok=True)
 
 # === Import LLM Clients ===
 if USE_OPENAI:
-    from openai import OpenAI
-    openai_client = OpenAI()
+    try:
+        from openai import OpenAI
+        openai_client = OpenAI()
+    except ImportError:
+        print("⚠️ OpenAI package not available")
+        openai_client = None
 
+# Try to import ollama, but don't fail if it's not available
 try:
     import ollama
 except ImportError:
-    raise ImportError("The 'ollama' Python package is required. Install it with `pip install ollama`.")
+    print("⚠️ Ollama package not available - local model features disabled")
+    ollama = None
 
 # === Load with Playwright ===
 def load_with_playwright(url, retries=3, delay=3):
