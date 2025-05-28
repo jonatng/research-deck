@@ -1,3 +1,1 @@
-# System packages for Streamlit Cloud
-# No additional packages required
-# The app uses requests for web scraping which works without additional dependencies 
+
