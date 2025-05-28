@@ -4,21 +4,36 @@ from auth import authenticate_user, create_user, update_last_login, is_logged_in
 def show_login_page():
     """Display the login/registration page"""
     
-    # Custom CSS for login page
+    # Custom CSS for dark mode login page
     st.markdown("""
     <style>
+        .stApp {
+            background-color: #0E1117;
+        }
+        
         .login-container {
             max-width: 400px;
             margin: 0 auto;
             padding: 2rem;
-            background: white;
+            background: #262730;
             border-radius: 10px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            border: 1px solid #3D4551;
         }
         
         .login-header {
             text-align: center;
             margin-bottom: 2rem;
+            color: #FAFAFA;
+        }
+        
+        .login-header h1 {
+            color: #FAFAFA;
+            margin-bottom: 0.5rem;
+        }
+        
+        .login-header p {
+            color: #A6A6A6;
         }
         
         .login-tabs {
@@ -27,11 +42,93 @@ def show_login_page():
         }
         
         .demo-credentials {
-            background: #f0f2f6;
+            background: #1E2329;
             padding: 1rem;
             border-radius: 8px;
             margin: 1rem 0;
-            border-left: 4px solid #667eea;
+            border-left: 4px solid #FF6B6B;
+            color: #FAFAFA;
+        }
+        
+        .demo-credentials h4 {
+            color: #FAFAFA;
+            margin-bottom: 0.5rem;
+        }
+        
+        .demo-credentials p {
+            color: #A6A6A6;
+            margin: 0.25rem 0;
+        }
+        
+        .demo-credentials em {
+            color: #8A8A8A;
+        }
+        
+        /* Style form inputs for dark mode */
+        .stTextInput > div > div > input {
+            background-color: #1E2329;
+            color: #FAFAFA;
+            border: 1px solid #3D4551;
+        }
+        
+        .stTextInput > div > div > input:focus {
+            border-color: #FF6B6B;
+            box-shadow: 0 0 0 1px #FF6B6B;
+        }
+        
+        /* Style tabs for dark mode */
+        .stTabs [data-baseweb="tab-list"] {
+            background-color: #262730;
+            border-radius: 8px 8px 0 0;
+            border-bottom: 1px solid #3D4551;
+        }
+        
+        .stTabs [data-baseweb="tab"] {
+            background-color: #1E2329;
+            color: #A6A6A6;
+            border: 1px solid #3D4551;
+            border-bottom: none;
+            border-radius: 8px 8px 0 0;
+            margin-right: 2px;
+            padding: 12px 24px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .stTabs [data-baseweb="tab"]:hover {
+            background-color: #262730;
+            color: #FAFAFA;
+            border-color: #5A6270;
+        }
+        
+        .stTabs [aria-selected="true"] {
+            background-color: #262730;
+            color: #FAFAFA;
+            border-color: #FF6B6B;
+            border-bottom: 2px solid #FF6B6B;
+            box-shadow: 0 -2px 8px rgba(255, 107, 107, 0.2);
+        }
+        
+        /* Style tab content area */
+        .stTabs [data-baseweb="tab-panel"] {
+            background-color: #262730;
+            border: 1px solid #3D4551;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            padding: 2rem;
+        }
+        
+        /* Style buttons for dark mode */
+        .stButton > button {
+            background-color: #FF6B6B;
+            color: #FAFAFA;
+            border: none;
+            border-radius: 6px;
+        }
+        
+        .stButton > button:hover {
+            background-color: #FF5252;
+            color: #FAFAFA;
         }
     </style>
     """, unsafe_allow_html=True)
@@ -52,16 +149,6 @@ def show_login_page():
     
     with tab2:
         show_registration_form()
-    
-    # Demo credentials info
-    st.markdown("""
-    <div class="demo-credentials">
-        <h4>🧪 Demo Credentials</h4>
-        <p><strong>Username:</strong> testuser</p>
-        <p><strong>Password:</strong> testpass123</p>
-        <p><em>Use these credentials to test the application</em></p>
-    </div>
-    """, unsafe_allow_html=True)
 
 def show_login_form():
     """Display the login form"""
@@ -71,11 +158,7 @@ def show_login_form():
         username = st.text_input("Username", placeholder="Enter your username")
         password = st.text_input("Password", type="password", placeholder="Enter your password")
         
-        col1, col2 = st.columns(2)
-        with col1:
-            login_button = st.form_submit_button("🔑 Login", use_container_width=True)
-        with col2:
-            demo_login = st.form_submit_button("🧪 Demo Login", use_container_width=True)
+        login_button = st.form_submit_button("🔑 Login", use_container_width=True)
         
         if login_button:
             if username and password:
@@ -89,16 +172,6 @@ def show_login_form():
                     st.error("❌ Invalid username or password")
             else:
                 st.warning("⚠️ Please enter both username and password")
-        
-        if demo_login:
-            user = authenticate_user("testuser", "testpass123")
-            if user:
-                st.session_state.user = user
-                update_last_login("testuser")
-                st.success("✅ Logged in with demo account!")
-                st.rerun()
-            else:
-                st.error("❌ Demo account not available. Please create it first.")
 
 def show_registration_form():
     """Display the registration form"""

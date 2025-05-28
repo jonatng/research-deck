@@ -56,44 +56,49 @@ def init_session_state():
 # Initialize session state
 init_session_state()
 
-# === Custom CSS for Beautiful Styling ===
+# === Custom CSS for Beautiful Dark Mode Styling ===
 st.markdown("""
 <style>
     .main-header {
         text-align: center;
         padding: 2rem 0;
-        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(90deg, #FF6B6B 0%, #FF5252 100%);
         color: white;
         border-radius: 10px;
         margin-bottom: 2rem;
+        box-shadow: 0 4px 20px rgba(255, 107, 107, 0.3);
     }
     
     .feature-card {
-        background: #f8f9fa;
+        background: #262730;
         padding: 1.5rem;
         border-radius: 10px;
-        border-left: 4px solid #667eea;
+        border-left: 4px solid #FF6B6B;
         margin: 1rem 0;
+        color: #FAFAFA;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
     }
     
     .status-card {
-        background: #e8f5e8;
+        background: #1E2329;
         padding: 1rem;
         border-radius: 8px;
         border: 1px solid #4caf50;
         margin: 0.5rem 0;
+        color: #FAFAFA;
     }
     
     .warning-card {
-        background: #fff3cd;
+        background: #2D2A1F;
         padding: 1rem;
         border-radius: 8px;
         border: 1px solid #ffc107;
         margin: 0.5rem 0;
+        color: #FAFAFA;
     }
     
     .stButton > button {
-        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(90deg, #FF6B6B 0%, #FF5252 100%);
         color: white;
         border: none;
         border-radius: 25px;
@@ -104,15 +109,82 @@ st.markdown("""
     
     .stButton > button:hover {
         transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        background: linear-gradient(90deg, #FF5252 0%, #FF4444 100%);
     }
     
     .metric-card {
-        background: white;
+        background: #262730;
         padding: 1rem;
         border-radius: 10px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
         text-align: center;
+        color: #FAFAFA;
+        border: 1px solid #3D4551;
+    }
+    
+    /* Dark mode text areas and inputs */
+    .stTextArea > div > div > textarea {
+        background-color: #1E2329;
+        color: #FAFAFA;
+        border: 1px solid #3D4551;
+    }
+    
+    .stTextArea > div > div > textarea:focus {
+        border-color: #FF6B6B;
+        box-shadow: 0 0 0 1px #FF6B6B;
+    }
+    
+    .stSelectbox > div > div > select {
+        background-color: #1E2329;
+        color: #FAFAFA;
+        border: 1px solid #3D4551;
+    }
+    
+    /* Dark mode expanders */
+    .streamlit-expanderHeader {
+        background-color: #262730;
+        color: #FAFAFA;
+    }
+    
+    .streamlit-expanderContent {
+        background-color: #1E2329;
+        border: 1px solid #3D4551;
+    }
+    
+    /* Dark mode sidebar */
+    .css-1d391kg {
+        background-color: #0E1117;
+    }
+    
+    /* Dark mode success/warning messages */
+    .stSuccess {
+        background-color: #1B2E1B;
+        color: #4CAF50;
+        border: 1px solid #4CAF50;
+    }
+    
+    .stWarning {
+        background-color: #2E2A1B;
+        color: #FFC107;
+        border: 1px solid #FFC107;
+    }
+    
+    .stError {
+        background-color: #2E1B1B;
+        color: #F44336;
+        border: 1px solid #F44336;
+    }
+    
+    /* Dark mode file uploader */
+    .stFileUploader > div {
+        background-color: #262730;
+        border: 2px dashed #3D4551;
+        border-radius: 10px;
+    }
+    
+    .stFileUploader > div:hover {
+        border-color: #FF6B6B;
     }
 </style>
 """, unsafe_allow_html=True)

@@ -1,10 +1,16 @@
 import os
+import streamlit as st
 from supabase import create_client, Client
 from datetime import datetime
 
-# Supabase configuration
-SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+# Supabase configuration - try Streamlit secrets first, then environment variables
+try:
+    SUPABASE_URL = st.secrets.get("SUPABASE_URL") or os.getenv("SUPABASE_URL")
+    SUPABASE_KEY = st.secrets.get("SUPABASE_KEY") or os.getenv("SUPABASE_KEY")
+except:
+    # Fallback to environment variables if secrets not available
+    SUPABASE_URL = os.getenv("SUPABASE_URL")
+    SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 
 # Initialize Supabase client only if credentials are available
 supabase: Client = None
