@@ -5,19 +5,13 @@ from bs4 import BeautifulSoup
 import os
 import requests
 
-# Check if running on Hugging Face Spaces
-IS_HUGGINGFACE_SPACE = os.getenv("SPACE_ID") is not None
-
-# Only import Playwright if not on HF Spaces
-if not IS_HUGGINGFACE_SPACE:
-    try:
-        from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError
-        PLAYWRIGHT_AVAILABLE = True
-    except ImportError:
-        print("⚠️ Playwright not available - using requests fallback")
-        PLAYWRIGHT_AVAILABLE = False
-else:
-    print("🚀 Running on Hugging Face Spaces - using requests for web scraping")
+# Try to import Playwright, fallback to requests if not available
+try:
+    from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError
+    PLAYWRIGHT_AVAILABLE = True
+    print("✅ Playwright available for enhanced web scraping")
+except ImportError:
+    print("⚠️ Playwright not available - using requests fallback")
     PLAYWRIGHT_AVAILABLE = False
 
 # Create cache directory if needed
@@ -85,9 +79,13 @@ def extract_article_content(html):
 def get_article_content(url):
     print(f"🌍 Loading: {url}")
     
-    # Use appropriate loading method based on environment
-    if PLAYWRIGHT_AVAILABLE and not IS_HUGGINGFACE_SPACE:
-        html = load_with_playwright(url)
+    # Use Playwright if available, otherwise fallback to requests
+    if PLAYWRIGHT_AVAILABLE:
+        try:
+            html = load_with_playwright(url)
+        except Exception as e:
+            print(f"⚠️ Playwright failed, falling back to requests: {e}")
+            html = load_with_requests(url)
     else:
         html = load_with_requests(url)
 

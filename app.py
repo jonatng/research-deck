@@ -15,9 +15,29 @@ from ppt_handler import create_ppt_with_summaries, append_to_existing_ppt
 from db import insert_summary
 from summarize import summarize_text
 from config import validate_env
+from login_page import require_login, show_user_header
+from auth import get_current_user, create_test_user
 
 # === Validate Environment Variables ===
 validate_env()
+
+# === Initialize Test User ===
+# Create test user on startup if database is available
+try:
+    create_test_user()
+except Exception as e:
+    print(f"⚠️ Could not create test user: {e}")
+
+# === Streamlit UI Setup ===
+st.set_page_config(
+    page_title="AI Research Deck",
+    page_icon="📰",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+# === Authentication Check ===
+require_login()
 
 # === Initialize Session State ===
 def init_session_state():
@@ -35,14 +55,6 @@ def init_session_state():
 
 # Initialize session state
 init_session_state()
-
-# === Streamlit UI Setup ===
-st.set_page_config(
-    page_title="AI Research Deck",
-    page_icon="📰",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
 
 # === Custom CSS for Beautiful Styling ===
 st.markdown("""
@@ -106,10 +118,11 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # === Header Section ===
-st.markdown("""
+current_user = get_current_user()
+st.markdown(f"""
 <div class="main-header">
     <h1>📰 AI Research Deck</h1>
-    <p style="font-size: 1.2rem; margin: 0;">Transform articles into insights with AI-powered summarization</p>
+    <p style="font-size: 1.2rem; margin: 0;">Welcome back, {current_user['username']}! Transform articles into insights with AI-powered summarization</p>
 </div>
 """, unsafe_allow_html=True)
 
@@ -130,31 +143,15 @@ with st.sidebar:
     # Model Selection with better UI
     st.subheader("🤖 AI Model Selection")
     
-    if IS_HUGGINGFACE_SPACE:
-        st.info("🚀 Running on Hugging Face Spaces")
-        if openai_client:
-            st.success("✅ OpenAI GPT: Ready to use!")
-            model_choice = "OpenAI GPT"
-        else:
-            st.warning("⚠️ OpenAI API key not configured")
-            st.info("💡 Go to Space settings → Repository secrets → Add OPENAI_API_KEY")
-            model_choice = "OpenAI GPT (Not Configured)"
-    else:
-        model_choice = st.selectbox(
-            "Choose your AI engine:",
-            ["OpenAI GPT (API Key Required)", "Basic Text Extraction (No AI)"],
-            help="OpenAI provides high-quality AI summaries, or use basic text extraction",
-            key="model_choice"
-        )
+    model_choice = st.selectbox(
+        "Choose your AI engine:",
+        ["OpenAI GPT (API Key Required)", "Basic Text Extraction (No AI)"],
+        help="OpenAI provides high-quality AI summaries, or use basic text extraction",
+        key="model_choice"
+    )
     
     # Status indicators
     st.subheader("📊 System Status")
-    
-    # Check if running on Hugging Face Spaces
-    IS_HUGGINGFACE_SPACE = os.getenv("SPACE_ID") is not None
-    
-    if IS_HUGGINGFACE_SPACE:
-        st.info("🚀 Running on Hugging Face Spaces")
     
     # Show client initialization status
     if not st.session_state.get('clients_initialized', False):
@@ -164,10 +161,7 @@ with st.sidebar:
     if openai_client:
         st.success("✅ OpenAI: Available")
     else:
-        if IS_HUGGINGFACE_SPACE:
-            st.warning("⚠️ OpenAI: Configure API key in Space settings")
-        else:
-            st.warning("⚠️ OpenAI: Not configured")
+        st.warning("⚠️ OpenAI: Not configured")
     
     # Advanced Options
     with st.expander("🔧 Advanced Options"):
@@ -185,26 +179,16 @@ with st.sidebar:
         
     # Help Section
     with st.expander("❓ How to Use"):
-        if IS_HUGGINGFACE_SPACE:
-            st.markdown("""
-            **🚀 On Hugging Face Spaces:**
-            1. **Enter URLs**: Paste article URLs (one per line)
-            2. **Set API Key**: Configure OPENAI_API_KEY in Space settings for AI summaries
-            3. **Optional**: Upload existing PowerPoint to append to
-            4. **Run**: Click the processing button
-            5. **Download**: Get your PowerPoint presentation
-            
-            💡 **Tip**: Without API key, you'll get basic text extraction
-            """)
-        else:
-            st.markdown("""
-            **💻 Local Usage:**
-            1. **Enter URLs**: Paste article URLs (one per line)
-            2. **Choose Mode**: Select OpenAI GPT or Basic Extraction
-            3. **Optional**: Upload existing PowerPoint to append to
-            4. **Run**: Click the processing button
-            5. **Download**: Get your PowerPoint presentation
-            """)
+        st.markdown("""
+        **💻 Usage Instructions:**
+        1. **Enter URLs**: Paste article URLs (one per line)
+        2. **Choose Mode**: Select OpenAI GPT or Basic Extraction
+        3. **Optional**: Upload existing PowerPoint to append to
+        4. **Run**: Click the processing button
+        5. **Download**: Get your PowerPoint presentation
+        
+        💡 **Tip**: Configure OPENAI_API_KEY in Streamlit secrets for AI summaries
+        """)
 
 # === Main Content Area ===
 col1, col2 = st.columns([2, 1])
@@ -245,9 +229,6 @@ with col2:
         st.info(f"📄 File: {uploaded_pptx.name}")
 
 # === Method Selection Logic ===
-# Check if running on Hugging Face Spaces
-IS_HUGGINGFACE_SPACE = os.getenv("SPACE_ID") is not None
-
 if openai_client and ("OpenAI" in model_choice or model_choice == "OpenAI GPT"):
     selected_method = "openai"
     st.info("🚀 Using OpenAI GPT - High quality AI summaries!")
@@ -256,18 +237,17 @@ elif "Basic Text Extraction" in model_choice:
     st.info("📄 Using basic text extraction - No AI processing")
 else:
     selected_method = None
-    if IS_HUGGINGFACE_SPACE:
-        st.warning("⚠️ To use AI features, please set your OPENAI_API_KEY in the Space settings.")
-        st.info("💡 Go to your Space settings → Repository secrets → Add OPENAI_API_KEY")
-        st.info("🔄 Or use 'Basic Text Extraction' mode for simple article extraction")
-    else:
-        st.error("❌ OpenAI API key not configured. Please set OPENAI_API_KEY environment variable or use Basic mode.")
+    st.error("❌ OpenAI API key not configured. Please set OPENAI_API_KEY in Streamlit secrets or use Basic mode.")
+    st.info("💡 Go to Streamlit app settings → Secrets → Add OPENAI_API_KEY")
+    st.info("🔄 Or use 'Basic Text Extraction' mode for simple article extraction")
 
 # === Processing Functions ===
 def process_urls(urls, method):
     summaries = {}
     progress_bar = st.progress(0)
     status_text = st.empty()
+    current_user = get_current_user()
+    user_id = current_user['id'] if current_user else None
     
     for i, url in enumerate(urls):
         progress = (i + 1) / len(urls)
@@ -290,7 +270,8 @@ def process_urls(urls, method):
 
                 summary = summarize_text(combined_text, method=method)
                 summaries[url] = summary
-                insert_summary(url, summary)
+                # Associate summary with current user
+                insert_summary(url, summary, user_id)
                 
                 if st.session_state.show_debug:
                     with st.expander(f"Debug: {url}"):
@@ -300,7 +281,7 @@ def process_urls(urls, method):
         except Exception as e:
             error_msg = str(e).lower()
             if any(term in error_msg for term in ["429", "too many requests", "rate limit", "quota exceeded", "insufficient_quota"]):
-                st.error("🚫 API rate limit exceeded. Please try again later or switch to Ollama local model.")
+                st.error("🚫 API rate limit exceeded. Please try again later or use Basic Text Extraction mode.")
                 if method == "openai":
                     break
             else:
@@ -443,6 +424,6 @@ with st.expander("ℹ️ About Processing Options"):
 # Version and Credits
 st.markdown("""
 <div style="text-align: center; color: #666; margin-top: 2rem;">
-    <small>AI Research Deck v2.1 | Built with ❤️ using Streamlit & OpenAI | Optimized for Hugging Face Spaces</small>
+    <small>AI Research Deck v2.1 | Built with ❤️ using Streamlit & OpenAI | Optimized for Streamlit Cloud</small>
 </div>
 """, unsafe_allow_html=True)

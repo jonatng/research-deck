@@ -4,7 +4,7 @@ FROM python:3.11-slim
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    STREAMLIT_SERVER_PORT=7860 \
+    STREAMLIT_SERVER_PORT=8501 \
     STREAMLIT_SERVER_ADDRESS=0.0.0.0
 
 # Install system dependencies for Playwright
@@ -30,8 +30,8 @@ COPY . .
 # Create necessary directories
 RUN mkdir -p cache downloads .streamlit
 
-# Expose Streamlit port for Hugging Face Spaces
-EXPOSE 7860
+# Expose Streamlit port
+EXPOSE 8501
 
 # Default command to run the app
-CMD ["streamlit", "run", "app.py", "--server.port=7860", "--server.address=0.0.0.0"]
+CMD ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]

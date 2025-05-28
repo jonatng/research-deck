@@ -43,4 +43,4 @@ def create_basic_summary(text):
     if len(summary) > 1000:
         summary = summary[:1000] + "..."
     
-    return f"📄 **Article Extract:**\n\n{summary}\n\n💡 *For AI-powered summaries, configure OpenAI API key in Space settings.*"
+    return f"📄 **Article Extract:**\n\n{summary}\n\n💡 *For AI-powered summaries, configure OpenAI API key in Streamlit secrets.*"

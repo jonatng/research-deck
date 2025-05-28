@@ -82,7 +82,6 @@ Thumbs.db
 # ignore Docker volumes and data
 docker-data/
 postgres-data/
-ollama-data/
 
 # ignore Playwright cache
 .playwright/

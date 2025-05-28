@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "🚀 Starting AI Research Deck..."
-echo "This will take a few minutes on first run to download the AI model."
+echo "This will start the application with Streamlit."
 echo ""
 
 # Add Docker to PATH if it's not already available
@@ -22,26 +22,23 @@ docker compose up --build -d
 
 # Wait for containers to be ready
 echo "⏳ Waiting for services to start..."
-sleep 15
+sleep 10
 
-# Check if ollama container is running
-if docker compose ps | grep -q "ollama.*Up"; then
-    echo "🤖 Setting up AI model (this may take a few minutes on first run)..."
-    # Download the model if it doesn't exist
-    docker compose exec ollama ollama pull llama2
-    
+# Check if research-deck container is running
+if docker compose ps | grep -q "research-deck.*Up"; then
     echo ""
     echo "✅ Setup complete!"
-    echo "🌐 Open your browser and go to: http://localhost:7860"
+    echo "🌐 Open your browser and go to: http://localhost:8501"
     echo ""
     echo "📝 Features available:"
-    echo "  • 🤖 Local Ollama AI model (free, private)"
-    echo "  • 🚀 OpenAI GPT support (requires API key)"
+    echo "  • 🤖 OpenAI GPT support (requires API key)"
+    echo "  • 📄 Basic text extraction (no API required)"
     echo "  • 📊 PowerPoint export"
     echo "  • 💾 Database storage (optional)"
     echo ""
+    echo "💡 For AI summaries, set OPENAI_API_KEY in your environment"
     echo "To stop the application, run: ./stop.sh"
 else
-    echo "❌ Failed to start Ollama container. Please check Docker logs:"
-    echo "   docker compose logs ollama"
+    echo "❌ Failed to start application. Please check Docker logs:"
+    echo "   docker compose logs research-deck"
 fi 

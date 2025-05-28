@@ -14,12 +14,24 @@ license: mit
 
 An intelligent article summarization tool that extracts content from web URLs and generates concise summaries using AI models. Export your research directly to PowerPoint presentations.
 
-## 🚀 Quick Start (Local Installation)
+## 🚀 Quick Start
 
-### Prerequisites
+### Option 1: Streamlit Cloud (Recommended)
+Deploy directly to Streamlit Cloud for instant access:
+
+1. Fork this repository
+2. Connect to [Streamlit Cloud](https://streamlit.io/cloud)
+3. Deploy your fork
+4. Configure secrets in Streamlit Cloud settings:
+   - `OPENAI_API_KEY` (for AI summaries)
+   - `SUPABASE_URL` and `SUPABASE_KEY` (optional, for data storage)
+
+### Option 2: Local Installation
+
+#### Prerequisites
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running
 
-### One-Click Setup
+#### One-Click Setup
 
 **For Mac/Linux users:**
 ```bash
@@ -38,10 +50,9 @@ start.bat
 That's it! The script will:
 - ✅ Check if Docker is running
 - 📦 Download and start all required services
-- 🤖 Set up the AI model (llama2)
-- 🌐 Open the app at http://localhost:7860
+- 🌐 Open the app at http://localhost:8501
 
-### Manual Setup (Alternative)
+#### Manual Setup (Alternative)
 ```bash
 git clone https://github.com/yourusername/research-deck.git
 cd research-deck
@@ -51,35 +62,48 @@ docker compose up -d
 ## Features
 
 - 🔍 **Smart Content Extraction**: Automatically extracts article content, metadata, and Open Graph data
-- 🤖 **Local AI Processing**: Uses Ollama with Llama2 model (no API keys required!)
+- 🤖 **AI Processing**: Uses OpenAI GPT for high-quality summaries
 - 📊 **PowerPoint Export**: Create new presentations or append to existing ones
 - 💾 **Optional Database Storage**: Persistent storage of summaries using Supabase
 - 🎨 **Modern UI**: Clean, intuitive Streamlit interface
+- ☁️ **Cloud Ready**: Optimized for Streamlit Cloud deployment
 
 ## How to Use
 
 1. Enter one or more article URLs (one per line)
-2. Choose your preferred AI model:
-   - **Ollama Local Model**: Free, runs locally, no API required
-   - **OpenAI GPT**: Requires API key, higher quality summaries
-3. Click "Run Summarization"
+2. Choose your preferred processing method:
+   - **OpenAI GPT**: High-quality AI summaries (requires API key)
+   - **Basic Text Extraction**: Simple text extraction (no API required)
+3. Click "Start Summarization"
 4. Download your PowerPoint presentation
 
-## Optional Enhancements
+## Configuration
 
-For enhanced features, you can set these environment variables:
+### Streamlit Cloud Secrets
+Configure these in your Streamlit Cloud app settings → Secrets:
+
+```toml
+# Required for AI summaries
+OPENAI_API_KEY = "your_openai_api_key"
+
+# Optional for database storage
+SUPABASE_URL = "your_supabase_url"
+SUPABASE_KEY = "your_supabase_key"
+```
+
+### Local Environment Variables
+For local development, create a `.env` file:
 
 ```bash
 # For OpenAI GPT (higher quality summaries)
-export OPENAI_API_KEY=your_openai_key
-export USE_OPENAI=true
+OPENAI_API_KEY=your_openai_key
 
-# For database storage
-export SUPABASE_URL=your_supabase_url
-export SUPABASE_KEY=your_supabase_key
+# For database storage (optional)
+SUPABASE_URL=your_supabase_url
+SUPABASE_KEY=your_supabase_key
 ```
 
-## Stopping the Application
+## Stopping the Application (Local)
 
 **Easy way:**
 ```bash
@@ -110,22 +134,37 @@ research-deck/
 └── 🎨 .streamlit/              # UI configuration
 ```
 
+## Deployment Options
+
+### Streamlit Cloud (Recommended)
+- ✅ Free hosting
+- ✅ Automatic deployments
+- ✅ Built-in secrets management
+- ✅ No server maintenance
+
+### Docker Deployment
+- ✅ Self-hosted control
+- ✅ Custom infrastructure
+- ✅ Full feature access
+
 ## Troubleshooting
 
 **"Docker is not running"**: Start Docker Desktop and wait for it to fully load
 
-**"Site cannot be reached"**: Wait a few minutes for the AI model to download on first run
+**"Site cannot be reached"**: Wait a few minutes for services to start
 
-**Slow performance**: The local AI model takes time to process. For faster results, consider using OpenAI API
+**API errors**: Ensure your OpenAI API key is correctly configured in secrets
+
+**Slow performance**: Basic text extraction is faster but less detailed than AI summaries
 
 ## Technologies Used
 
-- **Streamlit**: Web interface
-- **Ollama + Llama2**: Local AI model (no API required)
-- **OpenAI GPT**: Optional enhanced AI (requires API key)
-- **Playwright**: Web scraping
+- **Streamlit**: Web interface and cloud hosting
+- **OpenAI GPT**: AI-powered summarization
+- **Playwright**: Enhanced web scraping
 - **python-pptx**: PowerPoint generation
 - **Docker**: Containerized deployment
+- **Supabase**: Optional database storage
 
 ## Contributing
 
@@ -142,4 +181,4 @@ MIT License - see LICENSE file for details.
 
 ---
 
-*Built with ❤️ for researchers and content creators*
+*Built with ❤️ for researchers and content creators | Optimized for Streamlit Cloud*

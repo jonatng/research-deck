@@ -4,9 +4,6 @@ import os
 
 openai_client = None
 
-# Check if running on Hugging Face Spaces
-IS_HUGGINGFACE_SPACE = os.getenv("SPACE_ID") is not None
-
 def initialize_clients():
     global openai_client
 
@@ -23,8 +20,5 @@ def initialize_clients():
             print(f"⚠️ OpenAI client initialization failed: {e}")
             openai_client = None
     else:
-        if IS_HUGGINGFACE_SPACE:
-            print("🚀 Running on Hugging Face Spaces - Set OPENAI_API_KEY in Space settings for AI features")
-        else:
-            print("⚠️ OPENAI_API_KEY not found - AI features disabled")
+        print("⚠️ OPENAI_API_KEY not found - AI features disabled")
         openai_client = None

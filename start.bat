@@ -1,6 +1,6 @@
 @echo off
 echo 🚀 Starting AI Research Deck...
-echo This will take a few minutes on first run to download the AI model.
+echo This will start the application with Streamlit.
 echo.
 
 REM Check if Docker is running
@@ -15,19 +15,22 @@ if errorlevel 1 (
 
 REM Start the services
 echo 📦 Starting services...
-docker compose up -d
+docker compose up --build -d
 
-REM Wait for ollama to be ready
-echo ⏳ Waiting for AI model to be ready...
+REM Wait for services to be ready
+echo ⏳ Waiting for services to start...
 timeout /t 10 /nobreak >nul
-
-REM Download the model if it doesn't exist
-echo 🤖 Setting up AI model (this may take a few minutes on first run)...
-docker compose exec ollama ollama pull llama2
 
 echo.
 echo ✅ Setup complete!
-echo 🌐 Open your browser and go to: http://localhost:7860
+echo 🌐 Open your browser and go to: http://localhost:8501
 echo.
+echo 📝 Features available:
+echo   • 🤖 OpenAI GPT support (requires API key)
+echo   • 📄 Basic text extraction (no API required)
+echo   • 📊 PowerPoint export
+echo   • 💾 Database storage (optional)
+echo.
+echo 💡 For AI summaries, set OPENAI_API_KEY in your environment
 echo To stop the application, run: stop.bat
 pause 

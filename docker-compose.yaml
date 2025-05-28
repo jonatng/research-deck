@@ -1,26 +1,7 @@
 services:
-  ollama:
-    image: ollama/ollama
-    ports:
-      - "11434:11434"
-    volumes:
-      - ollama-data:/root/.ollama
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:11434/api/version"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 30s
-
   research-deck:
     build: .
-    depends_on:
-      - ollama
     environment:
-      - USE_OPENAI=false
-      - OLLAMA_MODEL=llama2
-      - OLLAMA_BASE_URL=http://ollama:11434
       # Optional: Users can set these if they want enhanced features
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       - SUPABASE_URL=${SUPABASE_URL:-}
@@ -30,11 +11,10 @@ services:
       - downloads:/app/downloads
       - cache:/app/cache
     ports:
-      - "7860:7860"
-    command: streamlit run app.py --server.port=7860 --server.address=0.0.0.0
+      - "8501:8501"
+    command: streamlit run app.py --server.port=8501 --server.address=0.0.0.0
     restart: unless-stopped
 
 volumes:
-  ollama-data:
   downloads:
   cache:

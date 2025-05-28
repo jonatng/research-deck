@@ -2,9 +2,6 @@ import os
 from supabase import create_client, Client
 from datetime import datetime
 
-# Check if running on Hugging Face Spaces
-IS_HUGGINGFACE_SPACE = os.getenv("SPACE_ID") is not None
-
 # Supabase configuration
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
@@ -19,12 +16,9 @@ if SUPABASE_URL and SUPABASE_KEY:
         print(f"⚠️ Supabase initialization failed: {e}")
         supabase = None
 else:
-    if IS_HUGGINGFACE_SPACE:
-        print("🚀 Running on Hugging Face Spaces - Database features disabled")
-    else:
-        print("⚠️ Supabase credentials not found - database features disabled")
+    print("⚠️ Supabase credentials not found - database features disabled")
 
-def insert_summary(url: str, summary: str) -> bool:
+def insert_summary(url: str, summary: str, user_id: int = None) -> bool:
     """Insert a summary into the database. Returns True if successful, False otherwise."""
     if not supabase:
         print("⚠️ Database not available - skipping summary storage")
@@ -34,7 +28,8 @@ def insert_summary(url: str, summary: str) -> bool:
         data = {
             "url": url,
             "summary": summary,
-            "created_at": datetime.now().isoformat()
+            "created_at": datetime.now().isoformat(),
+            "user_id": user_id  # Associate with user if provided
         }
         
         result = supabase.table("summaries").insert(data).execute()
@@ -45,15 +40,56 @@ def insert_summary(url: str, summary: str) -> bool:
         print(f"❌ Failed to store summary in database: {e}")
         return False
 
-def get_summaries():
-    """Retrieve all summaries from the database."""
+def get_summaries(user_id: int = None):
+    """Retrieve summaries from the database. If user_id provided, get user-specific summaries."""
     if not supabase:
         print("⚠️ Database not available")
         return []
         
     try:
-        result = supabase.table("summaries").select("*").execute()
+        if user_id:
+            # Get user-specific summaries
+            result = supabase.table("summaries").select("*").eq("user_id", user_id).execute()
+        else:
+            # Get all summaries (for admin or public view)
+            result = supabase.table("summaries").select("*").execute()
         return result.data
     except Exception as e:
         print(f"❌ Failed to retrieve summaries: {e}")
         return []
+
+def create_tables():
+    """Create necessary tables if they don't exist"""
+    if not supabase:
+        print("⚠️ Database not available - cannot create tables")
+        return False
+    
+    try:
+        # Note: In Supabase, you typically create tables through the dashboard
+        # This function is for reference of the expected schema
+        print("📋 Expected database schema:")
+        print("""
+        -- Users table
+        CREATE TABLE users (
+            id SERIAL PRIMARY KEY,
+            username VARCHAR(50) UNIQUE NOT NULL,
+            email VARCHAR(100) UNIQUE NOT NULL,
+            password_hash VARCHAR(255) NOT NULL,
+            created_at TIMESTAMP DEFAULT NOW(),
+            last_login TIMESTAMP,
+            is_active BOOLEAN DEFAULT TRUE
+        );
+        
+        -- Summaries table (updated to include user_id)
+        CREATE TABLE summaries (
+            id SERIAL PRIMARY KEY,
+            url TEXT NOT NULL,
+            summary TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT NOW(),
+            user_id INTEGER REFERENCES users(id)
+        );
+        """)
+        return True
+    except Exception as e:
+        print(f"❌ Error displaying schema: {e}")
+        return False
