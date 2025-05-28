@@ -20,29 +20,9 @@ else:
     print("🚀 Running on Hugging Face Spaces - using requests for web scraping")
     PLAYWRIGHT_AVAILABLE = False
 
-# === Config ===
-USE_OPENAI = os.getenv("USE_OPENAI", "false").lower() == "true"
-OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "deepseek-r1")
-
 # Create cache directory if needed
 CACHE_DIR = Path("cache")
 CACHE_DIR.mkdir(exist_ok=True)
-
-# === Import LLM Clients ===
-if USE_OPENAI:
-    try:
-        from openai import OpenAI
-        openai_client = OpenAI()
-    except ImportError:
-        print("⚠️ OpenAI package not available")
-        openai_client = None
-
-# Try to import ollama, but don't fail if it's not available
-try:
-    import ollama
-except ImportError:
-    print("⚠️ Ollama package not available - local model features disabled")
-    ollama = None
 
 # === Load with Requests (Fallback) ===
 def load_with_requests(url, retries=3):

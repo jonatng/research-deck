@@ -2,7 +2,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Import but don't initialize immediately to avoid blocking
-from llm_clients import initialize_clients, openai_client, ollama_client, OLLAMA_MODEL, OLLAMA_BASE_URL
+from llm_clients import initialize_clients, openai_client
 
 import os
 import json
@@ -129,12 +129,23 @@ with st.sidebar:
     
     # Model Selection with better UI
     st.subheader("🤖 AI Model Selection")
-    model_choice = st.selectbox(
-        "Choose your AI engine:",
-        ["Ollama Local Model (Free)", "OpenAI GPT (API Key Required)"],
-        help="Local model runs on your machine, OpenAI provides higher quality but requires API key",
-        key="model_choice"
-    )
+    
+    if IS_HUGGINGFACE_SPACE:
+        st.info("🚀 Running on Hugging Face Spaces")
+        if openai_client:
+            st.success("✅ OpenAI GPT: Ready to use!")
+            model_choice = "OpenAI GPT"
+        else:
+            st.warning("⚠️ OpenAI API key not configured")
+            st.info("💡 Go to Space settings → Repository secrets → Add OPENAI_API_KEY")
+            model_choice = "OpenAI GPT (Not Configured)"
+    else:
+        model_choice = st.selectbox(
+            "Choose your AI engine:",
+            ["OpenAI GPT (API Key Required)", "Basic Text Extraction (No AI)"],
+            help="OpenAI provides high-quality AI summaries, or use basic text extraction",
+            key="model_choice"
+        )
     
     # Status indicators
     st.subheader("📊 System Status")
@@ -158,14 +169,6 @@ with st.sidebar:
         else:
             st.warning("⚠️ OpenAI: Not configured")
     
-    if ollama_client:
-        st.success("✅ Ollama: Available")
-    else:
-        if IS_HUGGINGFACE_SPACE:
-            st.info("ℹ️ Ollama: Not available on HF Spaces")
-        else:
-            st.warning("⚠️ Ollama: Not available")
-    
     # Advanced Options
     with st.expander("🔧 Advanced Options"):
         st.session_state.show_debug = st.checkbox(
@@ -182,13 +185,26 @@ with st.sidebar:
         
     # Help Section
     with st.expander("❓ How to Use"):
-        st.markdown("""
-        1. **Enter URLs**: Paste article URLs (one per line)
-        2. **Choose AI Model**: Select local or OpenAI
-        3. **Optional**: Upload existing PowerPoint
-        4. **Run**: Click the summarization button
-        5. **Download**: Get your PowerPoint presentation
-        """)
+        if IS_HUGGINGFACE_SPACE:
+            st.markdown("""
+            **🚀 On Hugging Face Spaces:**
+            1. **Enter URLs**: Paste article URLs (one per line)
+            2. **Set API Key**: Configure OPENAI_API_KEY in Space settings for AI summaries
+            3. **Optional**: Upload existing PowerPoint to append to
+            4. **Run**: Click the processing button
+            5. **Download**: Get your PowerPoint presentation
+            
+            💡 **Tip**: Without API key, you'll get basic text extraction
+            """)
+        else:
+            st.markdown("""
+            **💻 Local Usage:**
+            1. **Enter URLs**: Paste article URLs (one per line)
+            2. **Choose Mode**: Select OpenAI GPT or Basic Extraction
+            3. **Optional**: Upload existing PowerPoint to append to
+            4. **Run**: Click the processing button
+            5. **Download**: Get your PowerPoint presentation
+            """)
 
 # === Main Content Area ===
 col1, col2 = st.columns([2, 1])
@@ -232,25 +248,20 @@ with col2:
 # Check if running on Hugging Face Spaces
 IS_HUGGINGFACE_SPACE = os.getenv("SPACE_ID") is not None
 
-if "Ollama" in model_choice and ollama_client:
-    selected_method = "ollama"
-    st.info("🤖 Using Ollama Local Model - Free and private!")
-elif "OpenAI" in model_choice and openai_client:
+if openai_client and ("OpenAI" in model_choice or model_choice == "OpenAI GPT"):
     selected_method = "openai"
-    st.info("🚀 Using OpenAI GPT - High quality summaries!")
+    st.info("🚀 Using OpenAI GPT - High quality AI summaries!")
+elif "Basic Text Extraction" in model_choice:
+    selected_method = "basic"
+    st.info("📄 Using basic text extraction - No AI processing")
 else:
     selected_method = None
-    if "OpenAI" in model_choice:
-        if IS_HUGGINGFACE_SPACE:
-            st.warning("⚠️ To use this app on Hugging Face Spaces, please set your OPENAI_API_KEY in the Space settings.")
-            st.info("💡 Go to your Space settings → Repository secrets → Add OPENAI_API_KEY")
-        else:
-            st.error("❌ OpenAI API key not configured. Please set OPENAI_API_KEY environment variable.")
+    if IS_HUGGINGFACE_SPACE:
+        st.warning("⚠️ To use AI features, please set your OPENAI_API_KEY in the Space settings.")
+        st.info("💡 Go to your Space settings → Repository secrets → Add OPENAI_API_KEY")
+        st.info("🔄 Or use 'Basic Text Extraction' mode for simple article extraction")
     else:
-        if IS_HUGGINGFACE_SPACE:
-            st.warning("⚠️ Ollama is not available on Hugging Face Spaces. Please select OpenAI and configure your API key.")
-        else:
-            st.error("❌ Ollama not available. Please ensure Docker containers are running.")
+        st.error("❌ OpenAI API key not configured. Please set OPENAI_API_KEY environment variable or use Basic mode.")
 
 # === Processing Functions ===
 def process_urls(urls, method):
@@ -374,7 +385,8 @@ with col2:
                         total_chars = sum(len(summary) for summary in summaries.values())
                         st.metric("Total Summary Length", f"{total_chars:,} chars")
                     with col3:
-                        st.metric("AI Model Used", "Ollama" if selected_method == "ollama" else "OpenAI")
+                        method_name = "OpenAI GPT" if selected_method == "openai" else "Basic Extraction"
+                        st.metric("Processing Method", method_name)
             finally:
                 st.session_state.processing = False
 
@@ -405,32 +417,32 @@ with col2:
     """)
 
 # Model Information
-with st.expander("ℹ️ About AI Models"):
+with st.expander("ℹ️ About Processing Options"):
     col1, col2 = st.columns(2)
     
     with col1:
         st.markdown("""
-        **🤖 Ollama Local Model**
-        - ✅ Free to use
-        - ✅ Privacy-focused (runs locally)
-        - ✅ No API keys required
-        - ⚠️ Slower processing
-        - ⚠️ Basic quality summaries
-        """)
-    
-    with col2:
-        st.markdown("""
         **🚀 OpenAI GPT**
-        - ✅ High-quality summaries
+        - ✅ High-quality AI summaries
         - ✅ Fast processing
         - ✅ Advanced understanding
         - ⚠️ Requires API key
         - ⚠️ Usage costs apply
         """)
+    
+    with col2:
+        st.markdown("""
+        **📄 Basic Text Extraction**
+        - ✅ Free to use
+        - ✅ No API keys required
+        - ✅ Works immediately
+        - ⚠️ No AI processing
+        - ⚠️ Simple text excerpts only
+        """)
 
 # Version and Credits
 st.markdown("""
 <div style="text-align: center; color: #666; margin-top: 2rem;">
-    <small>AI Research Deck v2.0 | Built with ❤️ using Streamlit, Ollama & OpenAI</small>
+    <small>AI Research Deck v2.1 | Built with ❤️ using Streamlit & OpenAI | Optimized for Hugging Face Spaces</small>
 </div>
 """, unsafe_allow_html=True)
