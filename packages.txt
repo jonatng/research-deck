@@ -1,1 +1,6 @@
-
+# System packages needed for Tesseract OCR (EXPERIMENTAL - may break deployment)
+# Uncomment only if you really need OCR and are willing to risk deployment failures
+# tesseract-ocr
+# tesseract-ocr-eng
+# libtesseract-dev
+# libleptonica-dev
